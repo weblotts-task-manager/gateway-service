@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { authenticate } from "../middlewares/auth.middleware";
+import { logger } from "../middlewares/logger.middleware";
 const proxyRoutes = express.Router();
 
 proxyRoutes.use(
@@ -22,5 +23,22 @@ proxyRoutes.use(
     logger: console,
   })
 );
+
+proxyRoutes.get("/", async (req: Request, res: Response) => {
+  const healthCheck = {
+    uptime: process.uptime(),
+    message: "OK",
+    timestamp: Date.now(),
+    memoryUsage: process.memoryUsage(),
+  };
+
+  try {
+    res.status(200).json(healthCheck);
+  } catch (e: any) {
+    healthCheck.message = e.message;
+    logger.error("Health Check Failed", e);
+    res.status(503).json(healthCheck);
+  }
+});
 
 export default proxyRoutes;
