@@ -1,5 +1,6 @@
 import express, { Request, Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import { AUTH_SERVICE_URL, TASKS_SERVICE_URL } from "../config/env";
 import { authenticate } from "../middlewares/auth.middleware";
 import { logger } from "../middlewares/logger.middleware";
 const proxyRoutes = express.Router();
@@ -7,7 +8,7 @@ const proxyRoutes = express.Router();
 proxyRoutes.use(
   "/gateway/api/auth/",
   createProxyMiddleware<Request, Response>({
-    target: "http://localhost:5002/api/auth/",
+    target: AUTH_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/api/auth/:path": "" },
     logger: console,
@@ -17,7 +18,7 @@ proxyRoutes.use(
   "/gateway/api/tasks",
   authenticate,
   createProxyMiddleware<Request, Response>({
-    target: "http://localhost:5003/api/tasks/",
+    target: TASKS_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/api/tasks": "" },
     logger: console,
